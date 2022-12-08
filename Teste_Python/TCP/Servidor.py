@@ -31,7 +31,7 @@ print ("o cliente = ", docliente, " se conectou")
 
 user = {'apelido':'', 'ip':'', 'cont':0}
 
-def recebendoMensagem(lbl):
+def recebendoMensagem(lbl,conversa):
   while 1:
     Mensagem = ''
     #Recebe mensagem
@@ -46,25 +46,32 @@ def recebendoMensagem(lbl):
         # users.append(user.copy)
         
         Mensagem = "Nome: "+ user['apelido'] +" recebido"
-        print(Mensagem)
-        lbl.config(text = Mensagem)
+        conversa.append(Mensagem)
+        lbl.config(text = conversa)
 
         user['cont'] = 1
 
       else:
         Mensagem = user['apelido'] +": "+ Mensagem_Recebida
-        print(Mensagem)
-        lbl.config(text = Mensagem)
+        conversa.append(Mensagem)
+        lbl.config(text = conversa)
 
 def interface():
+
+    conversa = []
 
     def dadosMensagem():
         Mensagem = inputMensagem.get(1.0, "end-1c")
         if Mensagem != "":
             conexao.send(bytes(Mensagem,"utf8"))
-            # lbl.config (text = "Enviado")
-        else:
-            lbl.config (text = ("Ok"))
+            if user['apelido'] == '':
+                Mensagem = 'Eu: ' + Mensagem+"\n"
+                conversa.append(Mensagem)
+                lbl.config(text = conversa)
+            else:
+                Mensagem = user['apelido'] + ': ' + Mensagem+"\n"
+                conversa.append(Mensagem)
+                lbl.config(text = conversa)
 
     def close():
         conexao.close()
@@ -92,7 +99,7 @@ def interface():
     mensagemButton["command"] = close
     mensagemButton.pack()
 
-    threading.Thread(target=recebendoMensagem).start()
+    threading.Thread(target=recebendoMensagem, args=(lbl,conversa,)).start()
     root.mainloop()
 
 interface()
