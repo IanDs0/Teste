@@ -52,7 +52,10 @@ def recebendoMensagem(lbl,conversa):
         user['cont'] = 1
 
       else:
-        Mensagem = user['apelido'] +": "+ Mensagem_Recebida
+        arquivo = Mensagem_Recebida.replace()
+        print (arquivo)
+        Mensagem = user['apelido'] +": "+ Mensagem_Recebida+"\n"
+        
         conversa.append(Mensagem)
         lbl.config(text = conversa)
 
