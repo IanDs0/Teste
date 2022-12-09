@@ -1,5 +1,7 @@
 import socket
 import threading
+import os
+import shutil
 
 from tkinter import *
 from tkinter import filedialog
@@ -31,53 +33,137 @@ print ("o cliente = ", docliente, " se conectou")
 
 user = {'apelido':'', 'ip':'', 'cont':0}
 
+if os.path.isdir('./servidor') == False:
+    path = os.path.join('./', 'servidor')
+    os.mkdir(path)
+else:
+    shutil.rmtree('./servidor')
+    path = os.path.join('./', 'servidor')
+    os.mkdir(path)
+
 def recebendoMensagem(lbl,conversa):
+  conteudoComando = []
   while 1:
+
     Mensagem = ''
     #Recebe mensagem
-    Mensagem_Recebida = conexao.recv(1024).decode("utf-8")
+    Mensagem_Recebida = conexao.recv(1024)
     #Mensagem recebida do cliente 
-    if testa_mensagem != Mensagem_Recebida:  
-      
-    #aqui verifica se exite mensagem nova  
-      if user['cont'] == 0:
-        user['apelido'] = Mensagem_Recebida
-        user['ip'] = docliente
-        # users.append(user.copy)
-        
-        Mensagem = "Nome: "+ user['apelido'] +" recebido"
-        conversa.append(Mensagem)
-        lbl.config(text = conversa)
 
-        user['cont'] = 1
-
-      else:
-        arquivo = Mensagem_Recebida.replace()
-        print (arquivo)
-        Mensagem = user['apelido'] +": "+ Mensagem_Recebida+"\n"
+    if testa_mensagem != Mensagem_Recebida.decode("utf-8"):  
+    #aqui verifica se exite mensagem nova 
+      Mensagem_Recebida = Mensagem_Recebida.decode("utf-8") 
+      try:
+        conteudoComando = Mensagem_Recebida.split('|')
         
-        conversa.append(Mensagem)
-        lbl.config(text = conversa)
+        match conteudoComando[0]:
+
+          case '#arquivo':
+            print('arquivo')
+            saveArquivo(conteudoComando,user['apelido'],)
+
+
+          case '#apelido':
+            user['apelido'] = conteudoComando[1]
+            user['ip'] = docliente
+
+            path = os.path.join('./', 'cliente')
+            newPath = os.path.join('./', user['apelido'])
+            os.rename(path,newPath)
+
+            Mensagem = "Apelido recebido: "+ conteudoComando[1] +" \n"
+            conversa.append(Mensagem)
+            lbl.config(text = conversa)
+
+          case _:
+            if user['apelido'] != '':
+              Mensagem = user['apelido'] +": "+ Mensagem_Recebida+"\n"
+              
+              conversa.append(Mensagem)
+              lbl.config(text = conversa)
+            else:
+              Mensagem = "Desconhecido: "+ Mensagem_Recebida+"\n"
+              
+              conversa.append(Mensagem)
+              lbl.config(text = conversa)
+
+      except:
+          if user['apelido'] != '':
+            Mensagem = user['apelido'] +": "+ Mensagem_Recebida+"\n"
+            
+            conversa.append(Mensagem)
+            lbl.config(text = conversa)
+          else:
+            Mensagem = "Desconhecido: "+ Mensagem_Recebida+"\n"
+            
+            conversa.append(Mensagem)
+            lbl.config(text = conversa)
+
+
+def saveArquivo (conteudoComando,apelido,lbl,conversa):
+  
+  end = bytes("#enviado","utf8")
+
+  if user['apelido'] != '':
+    path = os.path.join('./'+apelido+'/'+conteudoComando[1])
+  else:
+    path = os.path.join('./servidor/'+conteudoComando[1])
+  
+  arq = open(path, 'wb')
+
+  while 1:
+      dados = conexao.recv(1024)
+      if dados == end:
+        print("\rrecebendo...")
+        break
+      arq.write(dados)
+  arq.close()
+
+  Mensagem = "O arquivo: "+conteudoComando[1]+"\nsalvo na pasta: "+path
+
+  conversa.append(Mensagem)
+  lbl.config(text = conversa)
+
+  print("\rRecebido")
 
 def interface():
 
     conversa = []
 
-    def dadosMensagem():
+    def sendMensagem():
         Mensagem = inputMensagem.get(1.0, "end-1c")
         if Mensagem != "":
             conexao.send(bytes(Mensagem,"utf8"))
-            if user['apelido'] == '':
-                Mensagem = 'Eu: ' + Mensagem+"\n"
-                conversa.append(Mensagem)
-                lbl.config(text = conversa)
-            else:
-                Mensagem = user['apelido'] + ': ' + Mensagem+"\n"
-                conversa.append(Mensagem)
-                lbl.config(text = conversa)
+            Mensagem = 'Eu: ' + Mensagem+"\n"
+            conversa.append(Mensagem)
+            lbl.config(text = conversa)
 
     def close():
         conexao.close()
+
+    #Pegar o arquivo a ser enviado
+    def procuraArquivo(): 
+        filename = filedialog.askopenfilename(initialdir = "/", 
+          title = "Select a File", 
+          filetypes = (("all files", "*.*"),("all files", "*.*"))) 
+        
+        name = filename.split('/')
+        file_size = os.path.getsize(filename)
+        aviso = '#arquivo|'+name[-1]+'|'+str(file_size)
+        conexao.send(bytes(aviso,"utf8"))
+
+        ###############################################
+        print(filename)
+
+        arquivo = open (filename, "rb")
+        ler_buffer = arquivo.read(1024) 
+        while (ler_buffer):
+            print("\renviando...")
+            conexao.send(ler_buffer) 
+            ler_buffer = arquivo.read(1024)
+        conexao.send(bytes("#enviado","utf8"))
+        print("arquivo enviado")
+        ################################################
 
     root = Tk()
 
@@ -94,8 +180,13 @@ def interface():
 
     mensagemButton = Button(root) 
     mensagemButton["text"] = "Enviar Mensagens"
-    mensagemButton["command"] = dadosMensagem
+    mensagemButton["command"] = sendMensagem
     mensagemButton.pack()
+
+    button_explore = Button(root)  
+    button_explore["text"] = "Enviar Arquivo" 
+    button_explore["command"] = procuraArquivo
+    button_explore.pack()
 
     mensagemButton = Button(root) 
     mensagemButton["text"] = "Fechar conexão"
@@ -109,3 +200,6 @@ interface()
 
 conexao.close()
 # finalizar o socket
+
+#O comando #apelido envia seu nome
+#O comando #arquivo envia os dads de como será o arquivo enviado
