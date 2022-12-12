@@ -50,54 +50,54 @@ def recebendoMensagem(lbl,conversa):
     Mensagem_Recebida = conexao.recv(1024)
     #Mensagem recebida do cliente 
 
-    if testa_mensagem != Mensagem_Recebida.decode("utf-8"):  
     #aqui verifica se exite mensagem nova 
-      Mensagem_Recebida = Mensagem_Recebida.decode("utf-8") 
-      try:
-        conteudoComando = Mensagem_Recebida.split('|')
+    try:
+        Mensagem_Recebida = Mensagem_Recebida.decode("utf-8") 
+        if testa_mensagem != Mensagem_Recebida:  
+          conteudoComando = Mensagem_Recebida.split('|')
+          
+          match conteudoComando[0]:
+
+            case '#arquivo':
+              print('arquivo')
+              saveArquivo(conteudoComando,user['apelido'],lbl,conversa)
+
+
+            case '#apelido':
+              user['apelido'] = conteudoComando[1]
+              user['ip'] = docliente
+
+              path = os.path.join('./', 'cliente')
+              newPath = os.path.join('./', user['apelido'])
+              os.rename(path,newPath)
+
+              Mensagem = "Apelido recebido: "+ conteudoComando[1] +" \n"
+              conversa.append(Mensagem)
+              lbl.config(text = conversa)
+
+            case _:
+              if user['apelido'] != '':
+                Mensagem = user['apelido'] +": "+ Mensagem_Recebida+"\n"
+                
+                conversa.append(Mensagem)
+                lbl.config(text = conversa)
+              else:
+                Mensagem = "Desconhecido: "+ Mensagem_Recebida+"\n"
+                
+                conversa.append(Mensagem)
+                lbl.config(text = conversa)
+
+    except:
+      if user['apelido'] != '':
+        Mensagem = user['apelido'] +": "+ Mensagem_Recebida+"\n"
         
-        match conteudoComando[0]:
-
-          case '#arquivo':
-            print('arquivo')
-            saveArquivo(conteudoComando,user['apelido'],)
-
-
-          case '#apelido':
-            user['apelido'] = conteudoComando[1]
-            user['ip'] = docliente
-
-            path = os.path.join('./', 'cliente')
-            newPath = os.path.join('./', user['apelido'])
-            os.rename(path,newPath)
-
-            Mensagem = "Apelido recebido: "+ conteudoComando[1] +" \n"
-            conversa.append(Mensagem)
-            lbl.config(text = conversa)
-
-          case _:
-            if user['apelido'] != '':
-              Mensagem = user['apelido'] +": "+ Mensagem_Recebida+"\n"
-              
-              conversa.append(Mensagem)
-              lbl.config(text = conversa)
-            else:
-              Mensagem = "Desconhecido: "+ Mensagem_Recebida+"\n"
-              
-              conversa.append(Mensagem)
-              lbl.config(text = conversa)
-
-      except:
-          if user['apelido'] != '':
-            Mensagem = user['apelido'] +": "+ Mensagem_Recebida+"\n"
-            
-            conversa.append(Mensagem)
-            lbl.config(text = conversa)
-          else:
-            Mensagem = "Desconhecido: "+ Mensagem_Recebida+"\n"
-            
-            conversa.append(Mensagem)
-            lbl.config(text = conversa)
+        conversa.append(Mensagem)
+        lbl.config(text = conversa)
+      else:
+        Mensagem = "Desconhecido: "+ Mensagem_Recebida+"\n"
+        
+        conversa.append(Mensagem)
+        lbl.config(text = conversa)
 
 
 def saveArquivo (conteudoComando,apelido,lbl,conversa):
