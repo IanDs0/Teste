@@ -66,7 +66,7 @@ def buscar_contato(contato):
 
     driver.find_element(By.XPATH,'//*[@id="side"]/div[1]/div/div/div[2]/div/div[2]').send_keys(contato)
 
-    # sleep(0.2)
+    sleep(0.3)
 
     while True:
         if driver.find_element(By.XPATH,'/html/body/div[1]/div/div/div[3]/div/div[1]/div/div/div[2]/div/div[2]').text != contato:
@@ -89,25 +89,33 @@ def buscar_contato(contato):
 
 #Funcao que envia a mensagem
 def enviar_mensagem(mensagem):
-    pyperclip.copy(mensagem);
-    ActionChains(driver)\
-        .key_down(Keys.CONTROL)\
-        .send_keys('v')\
-        .key_up(Keys.CONTROL)\
-        .perform()
+
+    # nomeContato = ''#driver.find_element(By.XPATH, '//*[@id="app"]/div/div/div[2]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div/div[2]/div[1]/div[1]').text
+    
+    while driver.find_element(By.XPATH, '//*[@id="app"]/div/div/div[2]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div/div[2]/div[1]/div[1]').text == '':
+        print("\n-tenta-\n")
+        pyperclip.copy(mensagem);
+        ActionChains(driver)\
+            .key_down(Keys.CONTROL)\
+            .send_keys('v')\
+            .key_up(Keys.CONTROL)\
+            .perform()
             
-    # for i in range(np.size(mensagem)):
-    #     if mensagem[i] == ' | ':
-    #         ActionChains(driver)\
-    #             .key_down(Keys.SHIFT)\
-    #             .send_keys(Keys.ENTER)\
-    #             .key_up(Keys.SHIFT)\
-    #             .perform()
-    #     else:
-    #         ActionChains(driver)\
-    #             .send_keys(mensagem[i])\
-    #             .perform()
+        # nomeContato = driver.find_element(By.XPATH, '//*[@id="app"]/div/div/div[2]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div/div[2]/div[1]/div[1]').text
+
+        # for i in range(np.size(mensagem)):
+        #     if mensagem[i] == ' | ':
+        #         ActionChains(driver)\
+        #             .key_down(Keys.SHIFT)\
+        #             .send_keys(Keys.ENTER)\
+        #             .key_up(Keys.SHIFT)\
+        #             .perform()
+        #     else:
+        #         ActionChains(driver)\
+        #             .send_keys(mensagem[i])\
+        #             .perform()
     ActionChains(driver)\
+        .pause(0.3)\
         .send_keys(Keys.ENTER)\
         .perform()
 
@@ -145,6 +153,7 @@ def envio(mensagem,midia,send,event,barra,button_start):
             print("contato: "+str(contato)+"\n")
             i+=1    
             if (i%100==0):
+                button_start["text"] = "Descanso 60s"
                 sleep(60)
             progress = (i/tam)*100
             barra.set(progress)
