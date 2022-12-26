@@ -44,44 +44,48 @@ nomes = grupoContatos.columns
 
 #Funcao que pesquisa o Contato/Grupo
 def buscar_contato(contato):
-    campo_pesquisa = driver.find_element(By.XPATH,'/html/body/div[1]/div/div/div[3]/div/div[1]/div/div/button')
-    campo_pesquisa.click()
+    encontro = True
+    while encontro:
+        campo_pesquisa = driver.find_element(By.XPATH,'/html/body/div[1]/div/div/div[3]/div/div[1]/div/div/button')
+        campo_pesquisa.click()
 
-    ActionChains(driver)\
-                .pause(0.3)\
-                .key_down(Keys.CONTROL)\
-                .send_keys('a')\
-                .key_up(Keys.CONTROL)\
-                .send_keys(Keys.DELETE)\
-                .perform()
+        ActionChains(driver)\
+                    .pause(0.3)\
+                    .key_down(Keys.CONTROL)\
+                    .send_keys('a')\
+                    .key_up(Keys.CONTROL)\
+                    .send_keys(Keys.DELETE)\
+                    .perform()
 
-    driver.find_element(By.XPATH,'//*[@id="side"]/div[1]/div/div/div[2]/div/div[2]').send_keys(contato)
+        driver.find_element(By.XPATH,'//*[@id="side"]/div[1]/div/div/div[2]/div/div[2]').send_keys(contato)
 
-    sleep(0.3)
+        sleep(0.3)
 
-    while True:
-        if driver.find_element(By.XPATH,'/html/body/div[1]/div/div/div[3]/div/div[1]/div/div/div[2]/div/div[2]').text != contato:
+        while True:
+            if driver.find_element(By.XPATH,'/html/body/div[1]/div/div/div[3]/div/div[1]/div/div/div[2]/div/div[2]').text != contato:
 
-            ActionChains(driver)\
-                .pause(0.3)\
-                .key_down(Keys.CONTROL)\
-                .send_keys('a')\
-                .key_up(Keys.CONTROL)\
-                .send_keys(Keys.DELETE)\
-                .perform()
+                ActionChains(driver)\
+                    .pause(0.3)\
+                    .key_down(Keys.CONTROL)\
+                    .send_keys('a')\
+                    .key_up(Keys.CONTROL)\
+                    .send_keys(Keys.DELETE)\
+                    .perform()
 
-            driver.find_element(By.XPATH,'//*[@id="side"]/div[1]/div/div/div[2]/div/div[2]').send_keys(contato)
-            
-            print('erro')
-        else:
-            break
-    
-    driver.find_element(By.XPATH,'//*[@id="side"]/div[1]/div/div/div[2]/div/div[2]').send_keys(Keys.ENTER)
+                driver.find_element(By.XPATH,'//*[@id="side"]/div[1]/div/div/div[2]/div/div[2]').send_keys(contato)
+                
+                print('erro')
+            else:
+                break
+        
+        driver.find_element(By.XPATH,'//*[@id="side"]/div[1]/div/div/div[2]/div/div[2]').send_keys(Keys.ENTER)
+        
+        if(driver.find_element(By.XPATH,'//*[@id="main"]/header/div[2]/div[1]/div/span').text == contato):
+            encontro = False
+
 
 #Funcao que envia a mensagem
 def enviar_mensagem(mensagem):
-
-    # nomeContato = ''#driver.find_element(By.XPATH, '//*[@id="app"]/div/div/div[2]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div/div[2]/div[1]/div[1]').text
     
     while driver.find_element(By.XPATH, '//*[@id="app"]/div/div/div[2]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div/div[2]/div[1]/div[1]').text == '':
         print("\n-tenta-\n")
@@ -92,19 +96,6 @@ def enviar_mensagem(mensagem):
             .key_up(Keys.CONTROL)\
             .perform()
             
-        # nomeContato = driver.find_element(By.XPATH, '//*[@id="app"]/div/div/div[2]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div/div[2]/div[1]/div[1]').text
-
-        # for i in range(np.size(mensagem)):
-        #     if mensagem[i] == ' | ':
-        #         ActionChains(driver)\
-        #             .key_down(Keys.SHIFT)\
-        #             .send_keys(Keys.ENTER)\
-        #             .key_up(Keys.SHIFT)\
-        #             .perform()
-        #     else:
-        #         ActionChains(driver)\
-        #             .send_keys(mensagem[i])\
-        #             .perform()
     ActionChains(driver)\
         .pause(0.3)\
         .send_keys(Keys.ENTER)\
@@ -185,7 +176,7 @@ def concatGrups(array):
     print(padrao)
     contatos.extend(getContato(padrao))
 
-def enviar(mensagem,midia,save):
+def enviar(mensagem,midia):
 
     def start ():
         envioMensagem.start()
@@ -203,11 +194,12 @@ def enviar(mensagem,midia,save):
 
     resultado = 'Enviado'
 
-    send = Tk() 
+    send = Toplevel()
+    send.title('Envio')
 
 
     lbl = Label(send)   
-    lbl["text"] = save
+    lbl["text"] = mensagem
     lbl.pack()
 
     barra = DoubleVar(send,value=0)
@@ -227,10 +219,8 @@ def enviar(mensagem,midia,save):
     send.mainloop() 
     return resultado
 
-#interface gráfica
-# interface()
 def interface():
-#verificar e solicitar o arquivo a ser enviado
+    
     posGrupos = []
     mensagem = ''
     midia = ''
@@ -240,9 +230,7 @@ def interface():
         if men == "":
             lbl.config (text = "Não tem TEXTO para evio das mensagens")
         else:
-            mensagem = str(men)
-            save = mensagem
-            mensagem = mensagem.replace('\n', ' ¨ | ¨ ')
+            
             aux = False
 
             posGrupos.clear()
@@ -257,10 +245,9 @@ def interface():
 
                 if(midia != ""):
                     concatGrups(posGrupos)
-                    # mensagem = mensagem.split("¨")
                     mensagem = str(men)
 
-                    status = enviar(mensagem,midia,save)
+                    status = enviar(mensagem,midia)
                     if status == 'Enviado':
                         lbl.config (text = ("Enviando a mensagens: \n" + men + "\n Arquivo: \n" + midia))
                     else:
@@ -321,10 +308,9 @@ def interface():
     root.mainloop()
 
 # Abre o Firefox
-# driver = webdriver.Firefox()#webdriver.Chrome('./chromedriver.exe')
+# driver = webdriver.Firefox()
 # driver.get("https://web.whatsapp.com") #abre o site Whatsapp Web
 
-#https://stackoverflow.com/questions/50792181/how-to-save-the-session-of-whatsapp-web-with-selenium-python
 dir_path = os.getcwd()
 profile = os.path.join(dir_path, "profile", "wpp")
 options = webdriver.ChromeOptions()
@@ -334,7 +320,7 @@ options = webdriver.ChromeOptions()
 
 options.add_argument(r"user-data-dir={}".format(profile))
 
-driver = webdriver.Chrome(chrome_options=options)
+driver = webdriver.Chrome('./chromedriver.exe',chrome_options=options)
 
 driver.get("https://web.whatsapp.com")
 
@@ -352,49 +338,4 @@ try:
 except:
     print("Close")
 
-    driver.quit()   
-
-# def saveContato():
-#     #elemento que via scroll
-#     iframe = driver.find_element(By.XPATH, '//*[@id="pane-side"]/div/div/div')
-#     scroll_origin = ScrollOrigin.from_element(iframe)
-    
-#     #altura andada
-#     altura = 700
-
-#     sleep(1)
-
-#     Contato = []
-#     temporario = []
-#     anterior = []
-
-#     while(True):
-
-#         sleep(0.1)
-
-#         # Pega os contatos
-#         for person in driver.find_elements(By.XPATH,'//*[@id="pane-side"]/div/div/div/div'):
-#             nomeContato = person.find_element(By.XPATH, './div/div/div/div[2]/div[1]/div').text
-#             Contato.append(nomeContato)
-#             temporario.append(nomeContato)
-        
-#         # Anda para baixo
-#         ActionChains(driver)\
-#             .scroll_from_origin(scroll_origin, 0, altura)\
-#             .perform()
-        
-#         if(anterior == temporario):
-#             break
-
-#         anterior=temporario.copy()
-#         temporario.clear()
-
-#     #filtra contatos repetidos
-#     semRepetir = list(set(Contato))
-
-#     #salva os contatos
-#     salvar = pd.DataFrame(semRepetir)
-#     salvar = salvar.rename(columns = {0:'Contatos'})
-#     salvar.to_csv("Contatos.csv")
-
-# saveContato()
+    driver.quit()
