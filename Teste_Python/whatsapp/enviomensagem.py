@@ -1,158 +1,44 @@
-#bibliotecas necessarias, caso nao tenha instalada em sua maquina basta executar os comandos (pip instal....)
+#bibliotecas necessarias, caso nao tenha instalada em sua maquina basta executar os comandos (pip install -r requirements.txt)
 from selenium import webdriver
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.actions.action_builder import ActionBuilder
-from selenium.webdriver.common.actions.mouse_button import MouseButton
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.firefox.options import Options
 
-import time
 import pandas as pd
 from time import sleep
 import numpy as np
 import os
-import threading
 import pyperclip
 
 from tkinter import *
-from tkinter import filedialog 
-from tkinter import ttk
+from tkinter import filedialog
 
-from PIL import Image, ImageTk
+import sys
+sys.path.append('./Envio_Mensagem_com_Arquivo')
 
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.actions.wheel_input import ScrollOrigin
-from selenium.webdriver.firefox.options import Options
+from mensagemArquivo import *
 
 #start dados
 
-#Contatos/Grupos - Informar o nome(s) de Grupos ou Contatos que serao enviadas as mensagens
-contatos = []
+contatos = []#Contatos/Grupos - Informar o nome(s) de Grupos ou Contatos que serao enviadas as mensagens
 
-#starta a mensagem
-mensagem = ""
+mensagem = ""#starta a mensagem
 
-#Midia = imagem, pdf, documento, video (caminho do arquivo, lembrando que mesmo no windows o caminho deve ser passado com barra invertida */* ) 
-midia = ""
+midia = ""#Midia = imagem, pdf, documento, video (caminho do arquivo, lembrando que mesmo no windows o caminho deve ser passado com barra invertida */* ) 
 
 #incia os grupos
-grupoContatos = pd.read_csv("./planilhaGrupos.csv")
+grupoContatos = pd.read_csv("./csv/planilhaGrupos.csv")
 
 #inicia nomes dos padroes
 nomes = grupoContatos.columns
 
-#Funcao que pesquisa o Contato/Grupo
-def buscar_contato(contato):
-    encontro = True
-    while encontro:
-        campo_pesquisa = driver.find_element(By.XPATH,'/html/body/div[1]/div/div/div[3]/div/div[1]/div/div/button')
-        campo_pesquisa.click()
-
-        ActionChains(driver)\
-                    .pause(0.3)\
-                    .key_down(Keys.CONTROL)\
-                    .send_keys('a')\
-                    .key_up(Keys.CONTROL)\
-                    .send_keys(Keys.DELETE)\
-                    .perform()
-
-        driver.find_element(By.XPATH,'//*[@id="side"]/div[1]/div/div/div[2]/div/div[2]').send_keys(contato)
-
-        sleep(0.3)
-
-        while True:
-            if driver.find_element(By.XPATH,'/html/body/div[1]/div/div/div[3]/div/div[1]/div/div/div[2]/div/div[2]').text != contato:
-
-                ActionChains(driver)\
-                    .pause(0.3)\
-                    .key_down(Keys.CONTROL)\
-                    .send_keys('a')\
-                    .key_up(Keys.CONTROL)\
-                    .send_keys(Keys.DELETE)\
-                    .perform()
-
-                driver.find_element(By.XPATH,'//*[@id="side"]/div[1]/div/div/div[2]/div/div[2]').send_keys(contato)
-                
-                print('erro')
-            else:
-                break
-        
-        driver.find_element(By.XPATH,'//*[@id="side"]/div[1]/div/div/div[2]/div/div[2]').send_keys(Keys.ENTER)
-        
-        if(driver.find_element(By.XPATH,'//*[@id="main"]/header/div[2]/div[1]/div/span').text == contato):
-            encontro = False
-
-
-#Funcao que envia a mensagem
-def enviar_mensagem(mensagem):
-    
-    while driver.find_element(By.XPATH, '//*[@id="app"]/div/div/div[2]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div/div[2]/div[1]/div[1]').text == '':
-        print("\n-tenta-\n")
-        pyperclip.copy(mensagem);
-        ActionChains(driver)\
-            .key_down(Keys.CONTROL)\
-            .send_keys('v')\
-            .key_up(Keys.CONTROL)\
-            .perform()
-            
-    ActionChains(driver)\
-        .pause(0.3)\
-        .send_keys(Keys.ENTER)\
-        .perform()
-
-#Funcao que envia midia como mensagem
-def enviar_midia(midia):
-    
-    while len(driver.find_elements(By.XPATH,'/html/body/div[1]/div/div/div[4]/div/footer/div[1]/div/span[2]/div/div[1]/div[2]/div/div/span')) < 1:
-        sleep(0.0001)
-
-    #abre opção de upar arquivo
-    driver.find_element(By.XPATH,'/html/body/div[1]/div/div/div[4]/div/footer/div[1]/div/span[2]/div/div[1]/div[2]/div/div/span').click()
-    
-    #upa o arquivo
-    up=driver.find_element(By.XPATH,"//input[@type='file']")
-    up.send_keys(midia.replace("/", "\\"))
-
-    #esperar a imagem ou arquivo ser adcionado
-    while len(driver.find_elements(By.XPATH,'/html/body/div[1]/div/div/div[2]/div[2]/span/div/span/div/div/div[2]/div/div[1]/div[3]/div/div/div[1]')) < 1:
-        sleep(0.0001)
-
-#envia as mensagens
-def envio(mensagem,midia,send,event,barra,button_start):
-    i=0
-    tam=len(contatos)
-    print(contatos)
-    for contato in contatos:
-        button_start["text"] = "Cancelar"
-        if event.is_set():
-            break
-
-        try:
-
-            buscar_contato(contato)
-            enviar_midia(midia) 
-            enviar_mensagem(mensagem)
-            print("contato: "+str(contato)+"\n")
-            i+=1    
-            if (i%100==0):
-                button_start["text"] = "Descanso 60s"
-                sleep(60)
-                button_start["text"] = "Cancelar"
-            progress = (i/tam)*100
-            barra.set(progress)
-            send.update()
-        except:
-            print("\nerro: "+contato)
-            button_start["text"] = "Erro"
-    button_start["text"] = "Fechar"
-    barra.set(100)
-    send.update()
-
 #filtar dos contatos os que devem ser enviados
 def getContato(Filtro):
     #leitura e filtragem
-    salvo = pd.read_csv("./Contatos.csv")
+    salvo = pd.read_csv("./csv/Contatos.csv")
     salvo = salvo['Contatos'].values
 
     #array com os ontatos a serem enviados
@@ -175,49 +61,6 @@ def concatGrups(array):
 
     print(padrao)
     contatos.extend(getContato(padrao))
-
-def enviar(mensagem,midia):
-
-    def start ():
-        envioMensagem.start()
-
-        button_start.config (text = 'Cancelar')
-        button_start.config (command = cancelar)
-
-    def cancelar():
-        event.set()
-        resultado = 'Cancelar'
-        close()
-    
-    def close():
-        send.destroy()
-
-    resultado = 'Enviado'
-
-    send = Toplevel()
-    send.title('Envio')
-
-
-    lbl = Label(send)   
-    lbl["text"] = mensagem
-    lbl.pack()
-
-    barra = DoubleVar(send,value=0)
-
-    minha_barra = ttk.Progressbar(send, variable=barra, maximum=100)
-    minha_barra.pack()
-
-    button_start = Button(send)  
-    button_start["text"] = "Confirmar" 
-    button_start["command"] = start
-    button_start.pack()
-
-    event = threading.Event()
-    envioMensagem = threading.Thread(target=envio, args=(mensagem,midia,send,event,barra,button_start), name='envioMensagem')
-    
-
-    send.mainloop() 
-    return resultado
 
 def interface():
     
@@ -247,7 +90,10 @@ def interface():
                     concatGrups(posGrupos)
                     mensagem = str(men)
 
-                    status = enviar(mensagem,midia)
+                    status = ''
+
+                    enviar(mensagem,midia,driver,status,contatos)
+
                     if status == 'Enviado':
                         lbl.config (text = ("Enviando a mensagens: \n" + men + "\n Arquivo: \n" + midia))
                     else:
@@ -294,22 +140,15 @@ def interface():
         chkExample = Checkbutton(root, text=nomes[i], var=chkValue[i]) 
         chkExample.pack()
 
-
-
-
-
-    button_explore = Button(root)  
-    button_explore["text"] = "Padrao de Grupos" 
-    button_explore["command"] = procuraArquivo
-    button_explore.pack()
-
-    root.iconphoto(False, PhotoImage(file='./icon.png'))
-    # root.iconphoto(False, PhotoImage(file='./icon.jpeg'))
+    root.iconphoto(False, PhotoImage(file='./img/icon.png'))
+    # root.iconphoto(False, PhotoImage(file='./img/icon.jpeg'))
     root.mainloop()
 
-# Abre o Firefox
-# driver = webdriver.Firefox()
-# driver.get("https://web.whatsapp.com") #abre o site Whatsapp Web
+""" 
+Abre o Firefox
+driver = webdriver.Firefox()
+driver.get("https://web.whatsapp.com") #abre o site Whatsapp Web
+ """
 
 dir_path = os.getcwd()
 profile = os.path.join(dir_path, "profile", "wpp")
@@ -327,8 +166,8 @@ driver.get("https://web.whatsapp.com")
 
 try:
     while len(driver.find_elements(By.ID, 'side')) < 1:
-        time.sleep(0.1)
-    time.sleep(0.1) # só uma garantia
+        sleep(0.1)
+    sleep(0.1) # só uma garantia
 
     print("OK")
 

@@ -4,7 +4,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver import ActionChains
-
 from selenium.webdriver.common.actions.wheel_input import ScrollOrigin
 
 from time import sleep
@@ -63,18 +62,6 @@ teste = list(set(Contato))
 #salva
 salvar = pd.DataFrame(teste)
 salvar = salvar.rename(columns = {0:'Contatos'})
-salvar.to_csv("Contatos.csv")
-
-#leitura e filtragem
-# salvo = pd.read_csv("./Contatos.csv")
-# salvo = salvo['Contatos'].values
-
-# Busca = ['Pedro','Teste','Gelson']
-# envio = []
-
-# for busca in Busca:
-#     for contact in salvo:
-#         if contact.startswith(busca):
-#             envio.append(contact)
+salvar.to_csv("csv/Contatos.csv", index=False)
 
 driver.quit()
