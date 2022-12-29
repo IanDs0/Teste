@@ -54,7 +54,7 @@ def sendMensagem(mensagem,midia,send,event,barra,button_start, driver,contatos):
 
 
 
-def enviar(mensagem,midia,driver,resultado,contatos):
+def enviar(mensagem,midia,driver,contatos):
 
     def start ():
         envioMensagem.start()
@@ -64,13 +64,10 @@ def enviar(mensagem,midia,driver,resultado,contatos):
 
     def cancelar():
         event.set()
-        resultado = 'Cancelar'
         close()
     
     def close():
         send.destroy()
-
-    resultado = 'Enviado'
 
     send = Toplevel()
     send.title('Envio')

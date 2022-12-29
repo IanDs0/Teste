@@ -6,7 +6,7 @@
 
 ### Executa o arquivo que pega os contatos e salva em um '.csv'
 
-`python ./csv/pegarcontatos.py`
+`python pegarcontatos.py`
 
 ### Executa o sistema de envio de mensagens que pega os contatos e salvos e procura o padrão de grupos ou contato que estão em um '.csv' que deve ser colocado
 
@@ -14,4 +14,8 @@
 
 ## Fazer o Arquivo '.exe'
 
-`python -m PyInstaller --onefile -w arquivo_desejado.py`
+#### bastar abrir o terminal e executar o comando
+
+`auto-py-to-exe`
+
+#### logo após isso selecione o arquivo "enviomensagem.py" no "Script Location" e selecione o arquivo "buscaeEnvio.py" no "Additional Files" para criar o "enviomensagem.exe" já para o arquivo "enviomensagem.py" basta selecionalo no "Script Location" e mandar converter

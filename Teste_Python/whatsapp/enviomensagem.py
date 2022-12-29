@@ -12,13 +12,18 @@ from time import sleep
 import numpy as np
 import os
 import pyperclip
+import threading
 
 from tkinter import *
 from tkinter import filedialog
+from tkinter import ttk
+
 
 import sys
 sys.path.append('./Envio_Mensagem_com_Arquivo')
+sys.path.append('./Busca_Arquivo_Mensagem')
 
+from buscaeEnvio import *
 from mensagemArquivo import *
 
 #start dados
@@ -70,6 +75,7 @@ def interface():
 
     def dadosMensagem():
         men = inputMensagem.get(1.0, "end-1c")
+        lbl.config (text = "")
         if men == "":
             lbl.config (text = "Não tem TEXTO para evio das mensagens")
         else:
@@ -92,12 +98,7 @@ def interface():
 
                     status = ''
 
-                    enviar(mensagem,midia,driver,status,contatos)
-
-                    if status == 'Enviado':
-                        lbl.config (text = ("Enviando a mensagens: \n" + men + "\n Arquivo: \n" + midia))
-                    else:
-                        lbl.config (text = ("O envio das mensagens foi cancelado"))
+                    enviar(mensagem,midia,driver,contatos)
 
                 else:
                     lbl.config (text = "Não tem ARQUIVO para evio das mensagens")

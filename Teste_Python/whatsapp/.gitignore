@@ -1,5 +1,7 @@
 /.idea
 /build
 /profile
+/venv
+/.vscode
 *.spec
 *__pycache__
