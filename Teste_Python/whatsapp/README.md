@@ -18,4 +18,4 @@
 
 `auto-py-to-exe`
 
-#### logo após isso selecione o arquivo "enviomensagem.py" no "Script Location" e selecione o arquivo "buscaeEnvio.py" no "Additional Files" para criar o "enviomensagem.exe" já para o arquivo "enviomensagem.py" basta selecionalo no "Script Location" e mandar converter
+#### logo após isso selecione o arquivo "enviomensagem.py" no "Script Location" e selecione as pastas "Busca_Arquivo_Mensagem" e "Envio_Mensagem_com_Arquivo" no "Additional Folder" para criar o "enviomensagem.exe" já para o arquivo "enviomensagem.py" basta selecionalo no "Script Location" e mandar converter
