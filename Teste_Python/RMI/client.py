@@ -2,7 +2,7 @@ import Pyro4
 import tkinter as tk
 from datetime import datetime
 
-uri = "PYRO:obj_a7a603cfa8a4418799f8dd84df78cd8f@localhost:63137"
+uri = "PYRO:obj_f6a77830023c4aa2ae2a59915f44709d@localhost:50173"
 obj = Pyro4.Proxy(uri)
 
 
@@ -127,4 +127,4 @@ campo_resposta.pack()
 janela.mainloop()
 
 
-print(resultado)
+# print(resultado)
